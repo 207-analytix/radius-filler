@@ -5,11 +5,319 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Radius Filler — Dashboard</title>
   <link rel="stylesheet" href="./style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-  <div id="app">
-    <p>Loading...</p>
+
+<a href="#main" class="sr-only">Skip to content</a>
+
+<div class="app-layout">
+
+  <!-- Header -->
+  <header class="app-header">
+    <a href="./index.html" class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-label="Radius Filler logo">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+        <circle cx="12" cy="12" r="4" fill="currentColor" opacity="0.25"/>
+        <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      Radius Filler
+    </a>
+    <div class="header-actions">
+      <span class="practice-badge" id="practice-name">Demo Practice</span>
+      <button class="icon-btn" data-theme-toggle aria-label="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Sign out" id="signout-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <nav class="app-sidebar" aria-label="Main navigation">
+    <a href="./index.html" class="nav-item active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="./patients.html" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Patients
+    </a>
+    <div class="nav-spacer"></div>
+    <a href="./onboarding.html" class="nav-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Admin
+    </a>
+  </nav>
+
+  <!-- Main -->
+  <main class="app-main" id="main">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Today's Slots</h1>
+        <p class="page-subtitle" id="today-date">Loading…</p>
+      </div>
+      <button class="btn btn-primary" id="add-slot-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Add Slot
+      </button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid-4 section-gap" id="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-label">Open Slots</div>
+        <div class="kpi-value" id="kpi-open">—</div>
+        <div class="kpi-sub">Today</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Filled</div>
+        <div class="kpi-value" id="kpi-filled">—</div>
+        <div class="kpi-sub">Today</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Active Conversations</div>
+        <div class="kpi-value" id="kpi-convs">—</div>
+        <div class="kpi-sub">Across all slots</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Patients in Range</div>
+        <div class="kpi-value" id="kpi-pool">—</div>
+        <div class="kpi-sub">Within radius</div>
+      </div>
+    </div>
+
+    <!-- Slot cards -->
+    <div class="section-gap">
+      <div class="section-title">
+        Open Slots
+        <span class="section-title-count" id="open-slot-count">0</span>
+      </div>
+      <div class="slot-grid" id="slots-container">
+        <!-- Skeletons while loading -->
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+        <div class="skeleton skeleton-card"></div>
+      </div>
+    </div>
+
+    <!-- Live status panel -->
+    <div class="section-gap">
+      <div class="section-title">Live Activity</div>
+      <div class="live-panel">
+        <div class="live-panel-header">
+          <div class="card-title">Active Conversations</div>
+          <div class="live-indicator">
+            <span class="live-dot"></span>
+            Live
+          </div>
+        </div>
+        <div class="live-panel-body" id="convs-container">
+          <div class="empty-state">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <h3>No active conversations</h3>
+            <p>Fill a slot to start the AI outreach loop.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Add Slot Modal -->
+<div class="modal-overlay" id="add-slot-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">Add Open Slot</h2>
+      <button class="icon-btn" id="modal-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" for="slot-time">Slot Time</label>
+        <input class="form-input" type="time" id="slot-time" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="slot-type">Appointment Type</label>
+        <input class="form-input" type="text" id="slot-type" placeholder="e.g. Follow-up, New patient…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-save">Add Slot</button>
+    </div>
   </div>
-  <script type="module" src="./app.js"></script>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+<script type="module">
+import { supabase, PRACTICE_ID } from './app.js';
+
+// ---- Theme toggle ----
+(function(){
+  const t = document.querySelector('[data-theme-toggle]');
+  const r = document.documentElement;
+  let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  r.setAttribute('data-theme', d);
+  const moon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  const sun  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>';
+  if (t) t.addEventListener('click', () => {
+    d = d === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', d);
+    t.innerHTML = d === 'dark' ? sun : moon;
+    t.setAttribute('aria-label', 'Switch to ' + (d === 'dark' ? 'light' : 'dark') + ' mode');
+  });
+})();
+
+// ---- Date ----
+const dateEl = document.getElementById('today-date');
+dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric' });
+
+// ---- Toast ----
+function toast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${type === 'success' ? '<path d="M20 6 9 17l-5-5"/>' : '<circle cx="12" cy="12" r="10"/><path d="M15 9 9 15M9 9l6 6"/>'}</svg> ${msg}`;
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+// ---- Mock data (replace with Supabase queries after schema lands) ----
+const MOCK_SLOTS = [
+  { id: '1', slot_time: '09:00', type: 'Follow-up',   status: 'open',   filled_by: null },
+  { id: '2', slot_time: '10:30', type: 'New patient', status: 'filled', filled_by: 'Maria S.' },
+  { id: '3', slot_time: '13:00', type: 'Follow-up',   status: 'open',   filled_by: null },
+  { id: '4', slot_time: '14:30', type: 'Wellness',    status: 'open',   filled_by: null },
+];
+
+const MOCK_CONVS = [
+  { name: 'James T.', last: 'What time should I arrive?', time: '2m ago', status: 'pending' },
+  { name: 'Priya K.', last: 'Yes, I can make it at 9am.',  time: '5m ago', status: 'confirmed' },
+  { name: 'Derek O.', last: "Sorry, I can't make it.",    time: '8m ago', status: 'declined' },
+];
+
+// ---- Render KPIs ----
+function renderKPIs(slots, convs) {
+  document.getElementById('kpi-open').textContent   = slots.filter(s => s.status === 'open').length;
+  document.getElementById('kpi-filled').textContent = slots.filter(s => s.status === 'filled').length;
+  document.getElementById('kpi-convs').textContent  = convs.filter(c => c.status === 'pending').length;
+  document.getElementById('kpi-pool').textContent   = '—'; // PostGIS (#4) needed
+}
+
+// ---- Render Slots ----
+function renderSlots(slots) {
+  const container = document.getElementById('slots-container');
+  const openSlots = slots.filter(s => s.status !== 'filled');
+  document.getElementById('open-slot-count').textContent = openSlots.length;
+
+  const allCards = slots.map(slot => {
+    const isFilled = slot.status === 'filled';
+    const isActive = slot.status === 'active';
+    let statusBadge = `<span class="badge badge-open"><span class="badge-dot"></span>Open</span>`;
+    if (isFilled) statusBadge = `<span class="badge badge-filled"><span class="badge-dot"></span>Filled</span>`;
+    if (isActive) statusBadge = `<span class="badge badge-pending"><span class="badge-dot"></span>Outreach active</span>`;
+
+    const confirmedName = isFilled ? `<div class="slot-confirmed-name">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+      ${slot.filled_by}
+    </div>` : '';
+
+    const fillBtn = !isFilled ? `<button class="btn btn-primary btn-sm fill-btn" data-id="${slot.id}" data-time="${slot.slot_time}">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      Fill ${slot.slot_time} Slot
+    </button>` : '';
+
+    return `<div class="slot-card ${isFilled ? 'is-filled' : ''} ${isActive ? 'is-active' : ''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-2)">
+        <div class="slot-time">${slot.slot_time}</div>
+        ${statusBadge}
+      </div>
+      <div class="slot-type">${slot.type}</div>
+      ${confirmedName}
+      <div style="margin-top:var(--space-4)">${fillBtn}</div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = allCards;
+
+  // Attach fill button handlers
+  container.querySelectorAll('.fill-btn').forEach(btn => {
+    btn.addEventListener('click', () => triggerFill(btn.dataset.id, btn.dataset.time));
+  });
+}
+
+// ---- Render Conversations ----
+function renderConvs(convs) {
+  const container = document.getElementById('convs-container');
+  if (!convs.length) {
+    container.innerHTML = `<div class="empty-state">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <h3>No active conversations</h3>
+      <p>Fill a slot to start the AI outreach loop.</p>
+    </div>`;
+    return;
+  }
+  container.innerHTML = convs.map(c => `
+    <div class="conversation-row">
+      <div style="flex:1;min-width:0">
+        <div class="conv-name">${c.name}</div>
+        <div class="conv-last-msg">${c.last}</div>
+      </div>
+      <div class="conv-meta">
+        <span class="conv-time">${c.time}</span>
+        <span class="badge badge-${c.status}"><span class="badge-dot"></span>${c.status.charAt(0).toUpperCase()+c.status.slice(1)}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ---- Trigger fill (calls Edge Function when live) ----
+function triggerFill(slotId, slotTime) {
+  // TODO (#5): replace mock with:
+  // const { error } = await supabase.functions.invoke('trigger-slot-fill', { body: { slot_id: slotId, practice_id: PRACTICE_ID } });
+  toast(`Outreach triggered for ${slotTime} slot. AI is reaching out to nearby patients.`);
+
+  // Optimistic update — mark as active in mock state
+  const slot = MOCK_SLOTS.find(s => s.id === slotId);
+  if (slot) { slot.status = 'active'; renderSlots(MOCK_SLOTS); renderKPIs(MOCK_SLOTS, MOCK_CONVS); }
+}
+
+// ---- Init ----
+renderKPIs(MOCK_SLOTS, MOCK_CONVS);
+renderSlots(MOCK_SLOTS);
+renderConvs(MOCK_CONVS);
+
+// ---- Modal ----
+const modal = document.getElementById('add-slot-modal');
+document.getElementById('add-slot-btn').addEventListener('click', () => modal.classList.add('open'));
+document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('open'));
+document.getElementById('modal-cancel').addEventListener('click', () => modal.classList.remove('open'));
+modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+document.getElementById('modal-save').addEventListener('click', () => {
+  const time = document.getElementById('slot-time').value;
+  const type = document.getElementById('slot-type').value || 'Appointment';
+  if (!time) { toast('Please enter a slot time.', 'error'); return; }
+  MOCK_SLOTS.push({ id: Date.now().toString(), slot_time: time, type, status: 'open', filled_by: null });
+  MOCK_SLOTS.sort((a,b) => a.slot_time.localeCompare(b.slot_time));
+  renderSlots(MOCK_SLOTS);
+  renderKPIs(MOCK_SLOTS, MOCK_CONVS);
+  modal.classList.remove('open');
+  toast(`${time} slot added.`);
+});
+
+// TODO (#5): Subscribe to Supabase Realtime
+// supabase.channel('slots').on('postgres_changes', { event:'*', schema:'public', table:'slots' }, payload => {
+//   // reload slots
+// }).subscribe();
+</script>
 </body>
 </html>
