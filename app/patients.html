@@ -5,6 +5,231 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Radius Filler — Patient Directory</title>
   <link rel="stylesheet" href="./style.css">
+  <style>
+    /* ── Desktop two-panel layout ────────────────────────────── */
+    .patients-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
+    @media (min-width: 1100px) {
+      .patients-layout {
+        grid-template-columns: 1fr 320px;
+        align-items: start;
+      }
+    }
+
+    /* ── Live Feed panel ─────────────────────────────────────── */
+    .feed-panel {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: sticky;
+      top: calc(var(--space-16) + var(--space-4));
+    }
+    .feed-header {
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--color-divider);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .feed-header h2 {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .feed-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-success);
+      flex-shrink: 0;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .feed-list {
+      list-style: none;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+    .feed-item {
+      padding: var(--space-3) var(--space-5);
+      border-bottom: 1px solid var(--color-divider);
+      animation: feed-in 0.3s ease;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    @keyframes feed-in {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .feed-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: var(--space-1);
+    }
+    .feed-name {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .feed-time {
+      font-size: var(--text-xs);
+      color: var(--color-text-faint);
+    }
+    .feed-msg {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 260px;
+    }
+    .feed-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      margin-top: var(--space-1);
+    }
+    .feed-badge.replied   { background: var(--color-success-highlight); color: var(--color-success); }
+    .feed-badge.ai        { background: var(--color-primary-highlight); color: var(--color-primary); }
+    .feed-badge.confirmed { background: var(--color-warning-highlight); color: var(--color-warning); }
+    .feed-empty {
+      padding: var(--space-8) var(--space-5);
+      text-align: center;
+      color: var(--color-text-faint);
+      font-size: var(--text-sm);
+    }
+
+    /* ── Batch action bar ────────────────────────────────────── */
+    .batch-bar {
+      display: none;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-5);
+      background: var(--color-primary-highlight);
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--text-sm);
+    }
+    .batch-bar.visible { display: flex; }
+    .batch-count {
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+
+    /* ── Checkbox column ─────────────────────────────────────── */
+    .col-check { width: 40px; }
+    input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+    }
+
+    /* ── Phone: inline, +1 de-emphasized ────────────────────── */
+    .phone-number {
+      font-variant-numeric: tabular-nums;
+      color: var(--color-text);
+      font-size: var(--text-sm);
+    }
+    .phone-cc {
+      color: var(--color-text-faint);
+      font-size: var(--text-xs);
+      margin-right: 2px;
+    }
+
+    /* ── Location: town-first ────────────────────────────────── */
+    .loc-town {
+      font-weight: 600;
+      color: var(--color-text);
+      font-size: var(--text-sm);
+    }
+    .loc-zip {
+      font-size: var(--text-xs);
+      color: var(--color-text-faint);
+      display: block;
+    }
+
+    /* ── Last contacted cell ─────────────────────────────────── */
+    .td-contacted {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .td-contacted.never {
+      color: var(--color-text-faint);
+      font-style: italic;
+    }
+
+    /* ── Inline row actions ──────────────────────────────────── */
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      opacity: 0.35;
+      transition: opacity 0.15s;
+    }
+    tr:hover .row-actions { opacity: 1; }
+    .row-icon-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition-interactive), color var(--transition-interactive);
+    }
+    .row-icon-btn:hover {
+      background: var(--color-surface-offset);
+      color: var(--color-text);
+    }
+
+    /* ── Fill slot CTA (primary, prominent) ─────────────────── */
+    .btn-fill {
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      transition: background var(--transition-interactive), box-shadow var(--transition-interactive);
+    }
+    .btn-fill:hover {
+      background: var(--color-primary-hover);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-fill:active { background: var(--color-primary-active); }
+
+    /* ── Search bar import icon ──────────────────────────────── */
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex: 1;
+    }
+    .search-row .search-wrap { flex: 1; }
+  </style>
 </head>
 <body>
 
@@ -56,58 +281,111 @@
         <h1 class="page-title">Patient Directory</h1>
         <p class="page-subtitle">Active patients eligible for slot fill outreach</p>
       </div>
-      <div style="display:flex;gap:var(--space-3)">
-        <button class="btn btn-ghost" id="import-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Import CSV
-        </button>
+      <div style="display:flex;gap:var(--space-3);align-items:center">
         <button class="btn btn-primary" id="add-patient-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
           Add Patient
         </button>
+        <button class="btn-fill" id="fill-slot-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.21 17z"/></svg>
+          Open Cancellation Blast
+        </button>
       </div>
     </div>
 
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <div class="search-wrap">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input class="search-input" type="search" id="search-input" placeholder="Search by name, phone, or zip…" autocomplete="off">
-      </div>
-      <button class="btn btn-ghost btn-sm" id="toggle-inactive">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        Show inactive
-      </button>
-    </div>
+    <div class="patients-layout">
 
-    <!-- Table -->
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Zip / Town</th>
-              <th>Status</th>
-              <th>Added</th>
-              <th style="width:80px"></th>
-            </tr>
-          </thead>
-          <tbody id="patients-tbody">
-            <!-- Rendered by JS -->
-          </tbody>
-        </table>
-      </div>
-      <div class="pagination" id="pagination">
-        <span class="pagination-info" id="pagination-info">— patients</span>
-        <div class="pagination-btns">
-          <button class="btn btn-ghost btn-sm" id="prev-btn" disabled>← Prev</button>
-          <button class="btn btn-ghost btn-sm" id="next-btn">Next →</button>
+      <!-- Left: table column -->
+      <div>
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search-row">
+            <div class="search-wrap" style="flex:1">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+              <input class="search-input" type="search" id="search-input" placeholder="Search by name, phone, or zip…" autocomplete="off">
+            </div>
+            <!-- Import as small icon button next to search -->
+            <button class="icon-btn" id="import-btn" title="Import CSV" aria-label="Import CSV">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </button>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="toggle-inactive">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Show inactive
+          </button>
+        </div>
+
+        <!-- Batch action bar (hidden until rows selected) -->
+        <div class="batch-bar" id="batch-bar">
+          <span class="batch-count" id="batch-count">0 selected</span>
+          <button class="btn btn-primary btn-sm" id="batch-blast-btn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.78a16 16 0 0 0 6 6l.54-.54a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.21 17z"/></svg>
+            Send Custom Text Blast
+          </button>
+          <button class="btn btn-ghost btn-sm" id="batch-clear-btn">Clear</button>
+        </div>
+
+        <!-- Table -->
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-check">
+                    <input type="checkbox" id="select-all" title="Select all on page">
+                  </th>
+                  <th>Name</th>
+                  <th>Phone</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                  <th>Last Contacted</th>
+                  <th style="width:72px"></th>
+                </tr>
+              </thead>
+              <tbody id="patients-tbody"></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="pagination">
+            <span class="pagination-info" id="pagination-info">— patients</span>
+            <div class="pagination-btns">
+              <button class="btn btn-ghost btn-sm" id="prev-btn" disabled>← Prev</button>
+              <button class="btn btn-ghost btn-sm" id="next-btn">Next →</button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
+      <!-- Right: Live feed panel -->
+      <div class="feed-panel">
+        <div class="feed-header">
+          <span class="feed-dot"></span>
+          <h2>Live Activity</h2>
+        </div>
+        <ul class="feed-list" id="feed-list">
+          <li class="feed-item">
+            <div class="feed-meta"><span class="feed-name">Fatima</span><span class="feed-time">just now</span></div>
+            <p class="feed-msg">"On my way! See you at 2pm"</p>
+            <span class="feed-badge replied">Replied</span>
+          </li>
+          <li class="feed-item">
+            <div class="feed-meta"><span class="feed-name">James</span><span class="feed-time">2 min ago</span></div>
+            <p class="feed-msg">Gemini negotiating Tuesday slot…</p>
+            <span class="feed-badge ai">AI Active</span>
+          </li>
+          <li class="feed-item">
+            <div class="feed-meta"><span class="feed-name">Maria</span><span class="feed-time">8 min ago</span></div>
+            <p class="feed-msg">"Yes, that time works for me."</p>
+            <span class="feed-badge confirmed">Confirmed</span>
+          </li>
+          <li class="feed-item">
+            <div class="feed-meta"><span class="feed-name">Priya</span><span class="feed-time">14 min ago</span></div>
+            <p class="feed-msg">Outreach sent — awaiting response</p>
+            <span class="feed-badge ai">AI Active</span>
+          </li>
+        </ul>
+      </div>
+
+    </div><!-- /.patients-layout -->
   </main>
 </div>
 
@@ -128,17 +406,17 @@
         </div>
         <div class="form-group">
           <label class="form-label" for="p-phone">Mobile Phone</label>
-          <input class="form-input" type="tel" id="p-phone" placeholder="+1 (207) 555-0100">
+          <input class="form-input" type="tel" id="p-phone" placeholder="(207) 555-0100">
         </div>
       </div>
       <div class="grid-2" style="gap:var(--space-4)">
         <div class="form-group">
-          <label class="form-label" for="p-zip">Zip Code</label>
-          <input class="form-input" type="text" id="p-zip" placeholder="04101">
-        </div>
-        <div class="form-group">
           <label class="form-label" for="p-town">Town</label>
           <input class="form-input" type="text" id="p-town" placeholder="Portland">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="p-zip">Zip Code</label>
+          <input class="form-input" type="text" id="p-zip" placeholder="04101">
         </div>
       </div>
     </div>
@@ -177,6 +455,24 @@
   </div>
 </div>
 
+<!-- Convo history modal -->
+<div class="modal-overlay" id="convo-modal" role="dialog" aria-modal="true" aria-labelledby="convo-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="convo-title">Conversation History</h2>
+      <button class="icon-btn" id="convo-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="convo-body">
+      <p style="color:var(--color-text-muted);font-size:var(--text-sm)">No conversation history yet. History will appear here once the Gemini SMS loop (Issue #5) is live.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="convo-cancel">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
 <script type="module">
@@ -200,22 +496,49 @@ function toast(msg, type='success') {
   setTimeout(() => { t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, 3500);
 }
 
-// ---- Mock data ----
+// Strip +1 from phone for display — show inline, country code faded
+function formatPhone(raw) {
+  const cleaned = raw.replace(/^\+1\s?/, '').trim();
+  return `<span class="phone-cc">+1</span><span class="phone-number">${cleaned}</span>`;
+}
+
+// Location: bold town on top, zip muted underneath
+function formatLocation(zip, town) {
+  return `<span class="loc-town">${town}</span><span class="loc-zip">${zip}</span>`;
+}
+
+// Last contacted: human relative time
+function formatContacted(dateStr) {
+  if (!dateStr) return '<span class="td-contacted never">Never</span>';
+  const d = new Date(dateStr);
+  const now = new Date();
+  const days = Math.floor((now - d) / 86400000);
+  let label;
+  if (days === 0) label = 'Today';
+  else if (days === 1) label = 'Yesterday';
+  else if (days < 7) label = `${days}d ago`;
+  else if (days < 30) label = `${Math.floor(days/7)}w ago`;
+  else label = `${Math.floor(days/30)}mo ago`;
+  return `<span class="td-contacted">${label}</span>`;
+}
+
+// ── Mock data ──────────────────────────────────────────────
 let PATIENTS = [
-  { id:'1', first_name:'Maria',   mobile_phone:'+1 (207) 555-0101', zip_code:'04101', town:'Portland',  is_active:true,  created_at:'2026-03-12' },
-  { id:'2', first_name:'James',   mobile_phone:'+1 (207) 555-0102', zip_code:'04102', town:'Portland',  is_active:true,  created_at:'2026-03-15' },
-  { id:'3', first_name:'Priya',   mobile_phone:'+1 (207) 555-0103', zip_code:'04103', town:'Portland',  is_active:true,  created_at:'2026-04-01' },
-  { id:'4', first_name:'Derek',   mobile_phone:'+1 (207) 555-0104', zip_code:'04240', town:'Lewiston',  is_active:true,  created_at:'2026-04-10' },
-  { id:'5', first_name:'Fatima',  mobile_phone:'+1 (207) 555-0105', zip_code:'04106', town:'S. Portland',is_active:true,  created_at:'2026-04-18' },
-  { id:'6', first_name:'Carlos',  mobile_phone:'+1 (207) 555-0106', zip_code:'04105', town:'Portland',  is_active:false, created_at:'2026-02-20' },
-  { id:'7', first_name:'Sarah',   mobile_phone:'+1 (207) 555-0107', zip_code:'04401', town:'Bangor',    is_active:true,  created_at:'2026-05-01' },
-  { id:'8', first_name:'Michael', mobile_phone:'+1 (207) 555-0108', zip_code:'04101', town:'Portland',  is_active:true,  created_at:'2026-05-10' },
+  { id:'1', first_name:'Maria',   mobile_phone:'(207) 555-0101', zip_code:'04101', town:'Portland',    is_active:true,  last_contacted:'2026-05-20' },
+  { id:'2', first_name:'James',   mobile_phone:'(207) 555-0102', zip_code:'04102', town:'Portland',    is_active:true,  last_contacted:'2026-05-18' },
+  { id:'3', first_name:'Priya',   mobile_phone:'(207) 555-0103', zip_code:'04103', town:'Portland',    is_active:true,  last_contacted:'2026-05-15' },
+  { id:'4', first_name:'Derek',   mobile_phone:'(207) 555-0104', zip_code:'04240', town:'Lewiston',    is_active:true,  last_contacted:'2026-05-10' },
+  { id:'5', first_name:'Fatima',  mobile_phone:'(207) 555-0105', zip_code:'04106', town:'S. Portland', is_active:true,  last_contacted:null },
+  { id:'6', first_name:'Carlos',  mobile_phone:'(207) 555-0106', zip_code:'04105', town:'Portland',    is_active:false, last_contacted:'2026-04-01' },
+  { id:'7', first_name:'Sarah',   mobile_phone:'(207) 555-0107', zip_code:'04401', town:'Bangor',      is_active:true,  last_contacted:'2026-05-22' },
+  { id:'8', first_name:'Michael', mobile_phone:'(207) 555-0108', zip_code:'04101', town:'Portland',    is_active:true,  last_contacted:'2026-05-21' },
 ];
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 7;
 let page = 0;
 let query = '';
 let showInactive = false;
+let selectedIds = new Set();
 
 function filtered() {
   return PATIENTS.filter(p => {
@@ -226,55 +549,132 @@ function filtered() {
   });
 }
 
+function updateBatchBar() {
+  const bar = document.getElementById('batch-bar');
+  const count = document.getElementById('batch-count');
+  if (selectedIds.size > 0) {
+    bar.classList.add('visible');
+    count.textContent = `${selectedIds.size} selected`;
+  } else {
+    bar.classList.remove('visible');
+  }
+}
+
 function renderTable() {
   const rows = filtered();
   const start = page * PAGE_SIZE;
   const pageRows = rows.slice(start, start + PAGE_SIZE);
   const tbody = document.getElementById('patients-tbody');
+  const pageIds = pageRows.map(p => p.id);
 
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
       <h3>No patients found</h3>
       <p>Try a different search or add a patient.</p>
     </div></td></tr>`;
   } else {
-    tbody.innerHTML = pageRows.map(p => `<tr>
-      <td style="font-weight:500">${p.first_name}</td>
-      <td class="td-muted">${p.mobile_phone}</td>
-      <td class="td-muted">${p.zip_code} &middot; ${p.town}</td>
-      <td>${p.is_active
-        ? '<span class="badge badge-filled"><span class="badge-dot"></span>Active</span>'
-        : '<span class="badge badge-closed"><span class="badge-dot"></span>Inactive</span>'}
-      </td>
-      <td class="td-muted" style="font-variant-numeric:tabular-nums">${p.created_at}</td>
-      <td>
-        <button class="btn btn-ghost btn-sm deactivate-btn" data-id="${p.id}" title="${p.is_active ? 'Deactivate' : 'Activate'}">
-          ${p.is_active ? 'Deactivate' : 'Activate'}
-        </button>
-      </td>
-    </tr>`).join('');
+    tbody.innerHTML = pageRows.map(p => {
+      const checked = selectedIds.has(p.id) ? 'checked' : '';
+      return `<tr>
+        <td class="col-check">
+          <input type="checkbox" class="row-check" data-id="${p.id}" ${checked} aria-label="Select ${p.first_name}">
+        </td>
+        <td style="font-weight:600">${p.first_name}</td>
+        <td>${formatPhone(p.mobile_phone)}</td>
+        <td>${formatLocation(p.zip_code, p.town)}</td>
+        <td>${p.is_active
+          ? '<span class="badge badge-filled"><span class="badge-dot"></span>Active</span>'
+          : '<span class="badge badge-closed"><span class="badge-dot"></span>Inactive</span>'}
+        </td>
+        <td>${formatContacted(p.last_contacted)}</td>
+        <td>
+          <div class="row-actions">
+            <button class="row-icon-btn convo-btn" data-id="${p.id}" data-name="${p.first_name}" title="View conversation history" aria-label="View conversation for ${p.first_name}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </button>
+            <button class="row-icon-btn deactivate-btn" data-id="${p.id}" title="${p.is_active ? 'Deactivate' : 'Activate'}" aria-label="${p.is_active ? 'Deactivate' : 'Activate'} ${p.first_name}">
+              ${p.is_active
+                ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>'
+                : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v10m6.36 1.64a9 9 0 1 1-12.73 0"/></svg>'}
+            </button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
   }
+
+  // Sync select-all
+  const allChecked = pageIds.length > 0 && pageIds.every(id => selectedIds.has(id));
+  document.getElementById('select-all').checked = allChecked;
+  document.getElementById('select-all').indeterminate = !allChecked && pageIds.some(id => selectedIds.has(id));
 
   document.getElementById('pagination-info').textContent = `${rows.length} patient${rows.length !== 1 ? 's' : ''}`;
   document.getElementById('prev-btn').disabled = page === 0;
   document.getElementById('next-btn').disabled = start + PAGE_SIZE >= rows.length;
 
+  // Row checkboxes
+  tbody.querySelectorAll('.row-check').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) selectedIds.add(cb.dataset.id);
+      else selectedIds.delete(cb.dataset.id);
+      updateBatchBar();
+      const pageIds2 = filtered().slice(page*PAGE_SIZE, page*PAGE_SIZE+PAGE_SIZE).map(p=>p.id);
+      const allC = pageIds2.every(id => selectedIds.has(id));
+      document.getElementById('select-all').checked = allC;
+      document.getElementById('select-all').indeterminate = !allC && pageIds2.some(id => selectedIds.has(id));
+    });
+  });
+
+  // Deactivate toggle
   tbody.querySelectorAll('.deactivate-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const p = PATIENTS.find(x => x.id === btn.dataset.id);
       if (p) { p.is_active = !p.is_active; renderTable(); toast(`${p.first_name} ${p.is_active ? 'activated' : 'deactivated'}.`); }
     });
   });
+
+  // Convo buttons
+  tbody.querySelectorAll('.convo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('convo-title').textContent = `${btn.dataset.name} — Conversation History`;
+      document.getElementById('convo-modal').classList.add('open');
+    });
+  });
 }
 
-document.getElementById('search-input').addEventListener('input', e => { query = e.target.value; page = 0; renderTable(); });
+// Select all on page
+document.getElementById('select-all').addEventListener('change', e => {
+  const pageIds = filtered().slice(page*PAGE_SIZE, page*PAGE_SIZE+PAGE_SIZE).map(p=>p.id);
+  if (e.target.checked) pageIds.forEach(id => selectedIds.add(id));
+  else pageIds.forEach(id => selectedIds.delete(id));
+  updateBatchBar();
+  renderTable();
+});
+
+// Batch blast
+document.getElementById('batch-blast-btn').addEventListener('click', () => {
+  toast(`Custom blast queued for ${selectedIds.size} patient${selectedIds.size!==1?'s':''}. (Wire to Edge Function #5)`);
+  selectedIds.clear();
+  updateBatchBar();
+  renderTable();
+});
+document.getElementById('batch-clear-btn').addEventListener('click', () => {
+  selectedIds.clear(); updateBatchBar(); renderTable();
+});
+
+// Fill slot CTA
+document.getElementById('fill-slot-btn').addEventListener('click', () => {
+  toast('Cancellation blast triggered. (Wire to trigger-slot-fill Edge Function — Issue #5)');
+});
+
+// Search / pagination / inactive toggle
+document.getElementById('search-input').addEventListener('input', e => { query = e.target.value; page = 0; selectedIds.clear(); updateBatchBar(); renderTable(); });
 document.getElementById('prev-btn').addEventListener('click', () => { page--; renderTable(); });
 document.getElementById('next-btn').addEventListener('click', () => { page++; renderTable(); });
 const toggleBtn = document.getElementById('toggle-inactive');
 toggleBtn.addEventListener('click', () => {
-  showInactive = !showInactive;
-  page = 0;
+  showInactive = !showInactive; page = 0; selectedIds.clear(); updateBatchBar();
   toggleBtn.style.color = showInactive ? 'var(--color-primary)' : '';
   renderTable();
 });
@@ -291,7 +691,7 @@ document.getElementById('patient-modal-save').addEventListener('click', () => {
   const zip   = document.getElementById('p-zip').value.trim();
   const town  = document.getElementById('p-town').value.trim();
   if (!first) { toast('First name is required.', 'error'); return; }
-  PATIENTS.unshift({ id: Date.now().toString(), first_name:first, mobile_phone:phone||'—', zip_code:zip||'—', town:town||'—', is_active:true, created_at: new Date().toISOString().slice(0,10) });
+  PATIENTS.unshift({ id: Date.now().toString(), first_name:first, mobile_phone:phone||'—', zip_code:zip||'—', town:town||'—', is_active:true, last_contacted:null });
   renderTable();
   aModal.classList.remove('open');
   toast(`${first} added to directory.`);
@@ -305,7 +705,6 @@ document.getElementById('import-btn').addEventListener('click', () => iModal.cla
 document.getElementById('import-modal-close').addEventListener('click', () => iModal.classList.remove('open'));
 document.getElementById('import-cancel').addEventListener('click', () => iModal.classList.remove('open'));
 iModal.addEventListener('click', e => { if(e.target===iModal) iModal.classList.remove('open'); });
-
 function handleCSV(file) {
   const reader = new FileReader();
   reader.onload = e => {
@@ -327,7 +726,7 @@ document.getElementById('csv-file').addEventListener('change', e => { if(e.targe
 document.getElementById('drop-zone').addEventListener('click', () => document.getElementById('csv-file').click());
 document.getElementById('import-confirm').addEventListener('click', () => {
   parsedRows.forEach(r => {
-    PATIENTS.unshift({ id:Date.now().toString()+Math.random(), first_name:r.first_name, mobile_phone:r.mobile_phone||'—', zip_code:r.zip_code||'—', town:r.town||'—', is_active:true, created_at:new Date().toISOString().slice(0,10) });
+    PATIENTS.unshift({ id:Date.now().toString()+Math.random(), first_name:r.first_name, mobile_phone:r.mobile_phone||'—', zip_code:r.zip_code||'—', town:r.town||'—', is_active:true, last_contacted:null });
   });
   renderTable();
   iModal.classList.remove('open');
@@ -336,6 +735,12 @@ document.getElementById('import-confirm').addEventListener('click', () => {
   document.getElementById('import-preview').style.display = 'none';
   document.getElementById('import-confirm').disabled = true;
 });
+
+// Convo modal
+const cModal = document.getElementById('convo-modal');
+document.getElementById('convo-close').addEventListener('click', () => cModal.classList.remove('open'));
+document.getElementById('convo-cancel').addEventListener('click', () => cModal.classList.remove('open'));
+cModal.addEventListener('click', e => { if(e.target===cModal) cModal.classList.remove('open'); });
 
 renderTable();
 </script>
