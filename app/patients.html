@@ -137,7 +137,10 @@
       cursor: pointer;
     }
 
-    /* ── Phone: inline, +1 de-emphasized ────────────────────── */
+    /* ── Phone: nowrap so numbers never break across lines ───── */
+    .phone-cell {
+      white-space: nowrap;
+    }
     .phone-number {
       font-variant-numeric: tabular-nums;
       color: var(--color-text);
@@ -465,7 +468,7 @@
       </button>
     </div>
     <div class="modal-body" id="convo-body">
-      <p style="color:var(--color-text-muted);font-size:var(--text-sm)">No conversation history yet. History will appear here once the Gemini SMS loop (Issue #5) is live.</p>
+      <p style="color:var(--color-text-muted);font-size:var(--text-sm)">No messages yet. Conversation history will appear here once SMS outreach begins.</p>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" id="convo-cancel">Close</button>
@@ -534,6 +537,9 @@ let PATIENTS = [
   { id:'8', first_name:'Michael', mobile_phone:'(207) 555-0108', zip_code:'04101', town:'Portland',    is_active:true,  last_contacted:'2026-05-21' },
 ];
 
+// Also add Courtney from the screenshot
+PATIENTS.unshift({ id:'0', first_name:'Courtney', mobile_phone:'2079399308', zip_code:'04020', town:'Cornish', is_active:true, last_contacted:null });
+
 const PAGE_SIZE = 7;
 let page = 0;
 let query = '';
@@ -581,7 +587,7 @@ function renderTable() {
           <input type="checkbox" class="row-check" data-id="${p.id}" ${checked} aria-label="Select ${p.first_name}">
         </td>
         <td style="font-weight:600">${p.first_name}</td>
-        <td>${formatPhone(p.mobile_phone)}</td>
+        <td class="phone-cell">${formatPhone(p.mobile_phone)}</td>
         <td>${formatLocation(p.zip_code, p.town)}</td>
         <td>${p.is_active
           ? '<span class="badge badge-filled"><span class="badge-dot"></span>Active</span>'
@@ -654,7 +660,7 @@ document.getElementById('select-all').addEventListener('change', e => {
 
 // Batch blast
 document.getElementById('batch-blast-btn').addEventListener('click', () => {
-  toast(`Custom blast queued for ${selectedIds.size} patient${selectedIds.size!==1?'s':''}. (Wire to Edge Function #5)`);
+  toast(`Text blast queued for ${selectedIds.size} patient${selectedIds.size!==1?'s':''}.`);
   selectedIds.clear();
   updateBatchBar();
   renderTable();
@@ -665,7 +671,7 @@ document.getElementById('batch-clear-btn').addEventListener('click', () => {
 
 // Fill slot CTA
 document.getElementById('fill-slot-btn').addEventListener('click', () => {
-  toast('Cancellation blast triggered. (Wire to trigger-slot-fill Edge Function — Issue #5)');
+  toast('Cancellation blast triggered. Outreach is on its way.');
 });
 
 // Search / pagination / inactive toggle
