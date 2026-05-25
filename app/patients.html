@@ -6,232 +6,279 @@
   <title>Radius Filler — Patient Directory</title>
   <link rel="stylesheet" href="./style.css">
   <style>
-    /* ── Desktop two-panel layout ────────────────────────────── */
+    /* ── Layout ──────────────────────────────────────────────── */
     .patients-layout {
       display: grid;
       grid-template-columns: 1fr;
       gap: var(--space-6);
     }
     @media (min-width: 1100px) {
-      .patients-layout {
-        grid-template-columns: 1fr 320px;
-        align-items: start;
-      }
+      .patients-layout { grid-template-columns: 1fr 300px; align-items: start; }
     }
 
-    /* ── Live Feed panel ─────────────────────────────────────── */
+    /* ── Live Feed ───────────────────────────────────────────── */
     .feed-panel {
       background: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg);
       overflow: hidden;
       position: sticky;
-      top: calc(var(--space-16) + var(--space-4));
+      top: calc(var(--space-16, 4rem) + var(--space-4));
     }
-    .feed-header {
-      padding: var(--space-4) var(--space-5);
-      border-bottom: 1px solid var(--color-divider);
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-    }
-    .feed-header h2 {
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--color-text);
-    }
-    .feed-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--color-success);
-      flex-shrink: 0;
-      animation: pulse-dot 2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot {
-      0%,100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .feed-list {
-      list-style: none;
-      max-height: 480px;
-      overflow-y: auto;
-    }
-    .feed-item {
-      padding: var(--space-3) var(--space-5);
-      border-bottom: 1px solid var(--color-divider);
-      animation: feed-in 0.3s ease;
-    }
-    .feed-item:last-child { border-bottom: none; }
-    @keyframes feed-in {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .feed-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: var(--space-1);
-    }
-    .feed-name {
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--color-text);
-    }
-    .feed-time {
-      font-size: var(--text-xs);
-      color: var(--color-text-faint);
-    }
-    .feed-msg {
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 260px;
-    }
-    .feed-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 10px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      padding: 2px 7px;
-      border-radius: var(--radius-full);
-      margin-top: var(--space-1);
-    }
-    .feed-badge.replied   { background: var(--color-success-highlight); color: var(--color-success); }
-    .feed-badge.ai        { background: var(--color-primary-highlight); color: var(--color-primary); }
-    .feed-badge.confirmed { background: var(--color-warning-highlight); color: var(--color-warning); }
-    .feed-empty {
-      padding: var(--space-8) var(--space-5);
-      text-align: center;
-      color: var(--color-text-faint);
-      font-size: var(--text-sm);
-    }
+    .feed-header { padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-divider); display:flex; align-items:center; gap:var(--space-2); }
+    .feed-header h2 { font-size: var(--text-sm); font-weight:600; }
+    .feed-dot { width:8px; height:8px; border-radius:50%; background:var(--color-success); flex-shrink:0; animation:pulse-dot 2s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1}50%{opacity:0.4} }
+    .feed-list { list-style:none; max-height:480px; overflow-y:auto; }
+    .feed-item { padding:var(--space-3) var(--space-5); border-bottom:1px solid var(--color-divider); animation:feed-in 0.3s ease; cursor:pointer; }
+    .feed-item:last-child { border-bottom:none; }
+    .feed-item:hover { background:var(--color-surface-offset); }
+    @keyframes feed-in { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+    .feed-meta { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--space-1); }
+    .feed-name { font-size:var(--text-sm); font-weight:600; }
+    .feed-time { font-size:var(--text-xs); color:var(--color-text-faint); }
+    .feed-msg { font-size:var(--text-xs); color:var(--color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px; }
+    .feed-badge { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; padding:2px 7px; border-radius:var(--radius-full); margin-top:var(--space-1); }
+    .feed-badge.replied   { background:var(--color-success-highlight); color:var(--color-success); }
+    .feed-badge.ai        { background:var(--color-primary-highlight); color:var(--color-primary); }
+    .feed-badge.confirmed { background:var(--color-warning-highlight); color:var(--color-warning); }
+    .feed-empty { padding:var(--space-8) var(--space-5); text-align:center; color:var(--color-text-faint); font-size:var(--text-sm); }
 
-    /* ── Batch action bar ────────────────────────────────────── */
-    .batch-bar {
-      display: none;
-      align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-3) var(--space-5);
-      background: var(--color-primary-highlight);
-      border-bottom: 1px solid var(--color-border);
-      font-size: var(--text-sm);
-    }
-    .batch-bar.visible { display: flex; }
-    .batch-count {
-      font-weight: 600;
-      color: var(--color-primary);
-    }
+    /* ── Batch bar ───────────────────────────────────────────── */
+    .batch-bar { display:none; align-items:center; gap:var(--space-3); padding:var(--space-3) var(--space-5); background:var(--color-primary-highlight); border-bottom:1px solid var(--color-border); font-size:var(--text-sm); }
+    .batch-bar.visible { display:flex; }
+    .batch-count { font-weight:600; color:var(--color-primary); }
 
-    /* ── Checkbox column ─────────────────────────────────────── */
-    .col-check { width: 40px; }
-    input[type="checkbox"] {
-      width: 15px;
-      height: 15px;
-      accent-color: var(--color-primary);
-      cursor: pointer;
-    }
+    /* ── Checkbox ────────────────────────────────────────────── */
+    .col-check { width:40px; }
+    input[type="checkbox"] { width:15px; height:15px; accent-color:var(--color-primary); cursor:pointer; }
 
-    /* ── Phone: nowrap so numbers never break across lines ───── */
-    .phone-cell {
-      white-space: nowrap;
-    }
-    .phone-number {
-      font-variant-numeric: tabular-nums;
-      color: var(--color-text);
-      font-size: var(--text-sm);
-    }
-    .phone-cc {
-      color: var(--color-text-faint);
-      font-size: var(--text-xs);
-      margin-right: 2px;
-    }
+    /* ── Phone ───────────────────────────────────────────────── */
+    .phone-cell { white-space:nowrap; }
+    .phone-number { font-variant-numeric:tabular-nums; font-size:var(--text-sm); }
+    .phone-cc { color:var(--color-text-faint); font-size:var(--text-xs); margin-right:2px; }
 
-    /* ── Location: town-first ────────────────────────────────── */
-    .loc-town {
-      font-weight: 600;
-      color: var(--color-text);
-      font-size: var(--text-sm);
-    }
-    .loc-zip {
-      font-size: var(--text-xs);
-      color: var(--color-text-faint);
-      display: block;
-    }
+    /* ── Location ────────────────────────────────────────────── */
+    .loc-town { font-weight:600; font-size:var(--text-sm); }
+    .loc-zip  { font-size:var(--text-xs); color:var(--color-text-faint); display:block; }
 
-    /* ── Last contacted cell ─────────────────────────────────── */
-    .td-contacted {
-      font-size: var(--text-xs);
-      color: var(--color-text-muted);
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
+    /* ── AI State badges ─────────────────────────────────────── */
+    .ai-badge {
+      display:inline-flex; align-items:center; gap:5px;
+      font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;
+      padding:3px 8px; border-radius:var(--radius-full); white-space:nowrap;
     }
-    .td-contacted.never {
-      color: var(--color-text-faint);
-      font-style: italic;
-    }
+    .ai-badge .ai-dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+    .ai-idle         { background:var(--color-surface-offset);    color:var(--color-text-muted); }
+    .ai-intake       { background:#dbeafe; color:#1d4ed8; }
+    [data-theme="dark"] .ai-intake { background:#1e3a5f; color:#7eb3f8; }
+    .ai-negotiating  { background:#fef3c7; color:#b45309; }
+    [data-theme="dark"] .ai-negotiating { background:#422006; color:#fbbf24; }
+    .ai-negotiating .ai-dot { animation:pulse-amber 1.2s ease-in-out infinite; }
+    @keyframes pulse-amber { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.7)} }
+    .ai-synced   { background:var(--color-success-highlight); color:var(--color-success); }
+    .ai-booked   { background:#e0f2fe; color:#0369a1; }
+    [data-theme="dark"] .ai-booked { background:#0c2a3a; color:#38bdf8; }
+    .ai-blocked  { background:var(--color-error-highlight); color:var(--color-error); }
 
-    /* ── Inline row actions ──────────────────────────────────── */
-    .row-actions {
-      display: flex;
-      align-items: center;
-      gap: var(--space-1);
-      opacity: 0.35;
-      transition: opacity 0.15s;
+    /* ── Availability pill ───────────────────────────────────── */
+    .avail-pill {
+      font-size:var(--text-xs); color:var(--color-text-muted);
+      background:var(--color-surface-offset); border-radius:var(--radius-sm);
+      padding:2px 6px; font-variant-numeric:tabular-nums;
+      white-space:nowrap;
     }
-    tr:hover .row-actions { opacity: 1; }
-    .row-icon-btn {
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--radius-sm);
-      color: var(--color-text-muted);
-      background: none;
-      border: none;
-      cursor: pointer;
-      transition: background var(--transition-interactive), color var(--transition-interactive);
-    }
-    .row-icon-btn:hover {
-      background: var(--color-surface-offset);
-      color: var(--color-text);
-    }
+    .avail-none { font-size:var(--text-xs); color:var(--color-text-faint); font-style:italic; }
 
-    /* ── Fill slot CTA (primary, prominent) ─────────────────── */
-    .btn-fill {
-      background: var(--color-primary);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-md);
-      padding: var(--space-2) var(--space-4);
-      font-size: var(--text-sm);
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-2);
-      transition: background var(--transition-interactive), box-shadow var(--transition-interactive);
-    }
-    .btn-fill:hover {
-      background: var(--color-primary-hover);
-      box-shadow: var(--shadow-md);
-    }
-    .btn-fill:active { background: var(--color-primary-active); }
+    /* ── Last contacted ──────────────────────────────────────── */
+    .td-contacted { font-size:var(--text-xs); color:var(--color-text-muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .td-contacted.never { color:var(--color-text-faint); font-style:italic; }
 
-    /* ── Search bar import icon ──────────────────────────────── */
-    .search-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      flex: 1;
+    /* ── Row actions ─────────────────────────────────────────── */
+    .row-actions { display:flex; align-items:center; gap:var(--space-1); opacity:0.35; transition:opacity 0.15s; }
+    tr:hover .row-actions { opacity:1; }
+    .row-icon-btn { width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:var(--radius-sm); color:var(--color-text-muted); background:none; border:none; cursor:pointer; transition:background var(--transition),color var(--transition); }
+    .row-icon-btn:hover { background:var(--color-surface-offset); color:var(--color-text); }
+
+    /* ── Fill slot btn ───────────────────────────────────────── */
+    .btn-fill { background:var(--color-primary); color:#fff; border:none; border-radius:var(--radius-md); padding:var(--space-2) var(--space-4); font-size:var(--text-sm); font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:var(--space-2); transition:background var(--transition),box-shadow var(--transition); }
+    .btn-fill:hover { background:var(--color-primary-hover); box-shadow:var(--shadow-md); }
+    .btn-fill:active { background:var(--color-primary-active); }
+
+    /* ── Search row ──────────────────────────────────────────── */
+    .search-row { display:flex; align-items:center; gap:var(--space-2); flex:1; }
+    .search-row .search-wrap { flex:1; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       SLIDE-OVER DRAWER
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .drawer-backdrop {
+      position:fixed; inset:0; background:oklch(0.15 0 0 / 0.4);
+      backdrop-filter:blur(3px); z-index:250;
+      opacity:0; pointer-events:none;
+      transition:opacity 200ms ease;
     }
-    .search-row .search-wrap { flex: 1; }
+    .drawer-backdrop.open { opacity:1; pointer-events:auto; }
+    .drawer {
+      position:fixed; top:0; right:0; bottom:0;
+      width:min(480px, 100vw);
+      background:var(--color-surface);
+      border-left:1px solid var(--color-border);
+      box-shadow:var(--shadow-lg);
+      z-index:260;
+      display:flex; flex-direction:column;
+      transform:translateX(100%);
+      transition:transform 260ms cubic-bezier(0.16,1,0.3,1);
+    }
+    .drawer.open { transform:translateX(0); }
+
+    .drawer-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:var(--space-4) var(--space-5);
+      border-bottom:1px solid var(--color-divider);
+      background:var(--color-surface-2);
+      flex-shrink:0;
+    }
+    .drawer-patient-meta { display:flex; flex-direction:column; gap:2px; }
+    .drawer-patient-name { font-size:var(--text-base); font-weight:700; color:var(--color-text); }
+    .drawer-patient-sub  { font-size:var(--text-xs); color:var(--color-text-muted); }
+
+    .drawer-body { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
+
+    /* Availability summary strip */
+    .drawer-avail-strip {
+      padding:var(--space-3) var(--space-5);
+      background:var(--color-surface-offset);
+      border-bottom:1px solid var(--color-divider);
+      display:flex; align-items:center; justify-content:space-between; gap:var(--space-3);
+      flex-shrink:0;
+    }
+    .drawer-avail-items { display:flex; gap:var(--space-2); flex-wrap:wrap; }
+    .drawer-avail-chip { font-size:var(--text-xs); background:var(--color-primary-highlight); color:var(--color-primary); border-radius:var(--radius-full); padding:2px 8px; font-weight:600; }
+    .drawer-avail-empty { font-size:var(--text-xs); color:var(--color-text-faint); font-style:italic; }
+    .intake-refresh-btn { font-size:var(--text-xs); color:var(--color-primary); border:1px solid var(--color-primary-highlight); border-radius:var(--radius-full); padding:3px 10px; background:transparent; cursor:pointer; font-weight:600; white-space:nowrap; transition:background var(--transition); }
+    .intake-refresh-btn:hover { background:var(--color-primary-highlight); }
+
+    /* Convo log */
+    .convo-log {
+      flex:1; padding:var(--space-4) var(--space-5);
+      display:flex; flex-direction:column; gap:var(--space-3);
+      overflow-y:auto;
+    }
+    .convo-bubble-row { display:flex; flex-direction:column; align-items:flex-start; gap:2px; }
+    .convo-bubble-row.outbound { align-items:flex-end; }
+    .bubble-sender { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:var(--color-text-faint); padding:0 var(--space-2); }
+    .bubble {
+      max-width:78%; padding:var(--space-2) var(--space-3);
+      border-radius:var(--radius-lg); font-size:var(--text-sm); line-height:1.5;
+    }
+    .bubble.inbound {
+      background:var(--color-surface-offset);
+      color:var(--color-text);
+      border-bottom-left-radius:var(--radius-sm);
+    }
+    .bubble.outbound {
+      background:var(--color-primary);
+      color:#fff;
+      border-bottom-right-radius:var(--radius-sm);
+    }
+    .bubble-time { font-size:10px; color:var(--color-text-faint); padding:0 var(--space-2); }
+    .convo-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; gap:var(--space-3); color:var(--color-text-faint); text-align:center; padding:var(--space-10); }
+    .convo-empty svg { color:var(--color-text-faint); }
+    .convo-empty p { font-size:var(--text-sm); max-width:28ch; }
+
+    /* Manual override footer */
+    .drawer-footer {
+      border-top:1px solid var(--color-divider);
+      padding:var(--space-4) var(--space-5);
+      background:var(--color-surface-2);
+      display:flex; flex-direction:column; gap:var(--space-3);
+      flex-shrink:0;
+    }
+    .override-row { display:flex; align-items:center; justify-content:space-between; }
+    .override-label { font-size:var(--text-xs); font-weight:600; color:var(--color-text-muted); display:flex; align-items:center; gap:var(--space-2); }
+    .override-label svg { color:var(--color-warning); }
+    /* Toggle switch */
+    .toggle-wrap { display:flex; align-items:center; gap:var(--space-2); }
+    .toggle { position:relative; display:inline-block; width:36px; height:20px; }
+    .toggle input { opacity:0; width:0; height:0; }
+    .toggle-slider {
+      position:absolute; cursor:pointer; inset:0;
+      background:var(--color-border); border-radius:var(--radius-full);
+      transition:background var(--transition);
+    }
+    .toggle-slider::before {
+      content:''; position:absolute; height:14px; width:14px;
+      left:3px; bottom:3px; border-radius:50%;
+      background:#fff; transition:transform var(--transition);
+    }
+    .toggle input:checked + .toggle-slider { background:var(--color-warning); }
+    .toggle input:checked + .toggle-slider::before { transform:translateX(16px); }
+    .toggle-status { font-size:var(--text-xs); font-weight:600; }
+    .toggle-status.active { color:var(--color-warning); }
+
+    /* Manual compose */
+    .manual-compose { display:none; gap:var(--space-2); }
+    .manual-compose.visible { display:flex; }
+    .manual-input {
+      flex:1; padding:var(--space-2) var(--space-3);
+      border:1px solid var(--color-border); border-radius:var(--radius-md);
+      background:var(--color-surface); color:var(--color-text);
+      font-size:var(--text-sm);
+    }
+    .manual-input:focus { outline:none; border-color:var(--color-warning); box-shadow:0 0 0 3px oklch(from var(--color-warning) l c h / 0.15); }
+    .manual-send-btn { padding:var(--space-2) var(--space-3); background:var(--color-warning); color:#fff; border:none; border-radius:var(--radius-md); font-size:var(--text-sm); font-weight:600; cursor:pointer; white-space:nowrap; transition:background var(--transition); }
+    .manual-send-btn:hover { background:var(--color-warning-hover, #713417); }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       CANCELLATION BLAST MODAL
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    .blast-modal { max-width:540px; }
+    .blast-slot-row { display:flex; gap:var(--space-3); }
+    .blast-slot-row .form-group { flex:1; }
+    .match-preview {
+      border:1px solid var(--color-border); border-radius:var(--radius-md);
+      overflow:hidden; background:var(--color-surface-2);
+    }
+    .match-preview-header {
+      padding:var(--space-2) var(--space-4);
+      font-size:var(--text-xs); font-weight:600; text-transform:uppercase;
+      letter-spacing:0.06em; color:var(--color-text-muted);
+      border-bottom:1px solid var(--color-divider);
+      display:flex; justify-content:space-between;
+    }
+    .match-list { max-height:200px; overflow-y:auto; }
+    .match-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:var(--space-2) var(--space-4);
+      border-bottom:1px solid var(--color-divider);
+      font-size:var(--text-sm);
+    }
+    .match-row:last-child { border-bottom:none; }
+    .match-name { font-weight:600; }
+    .match-meta { font-size:var(--text-xs); color:var(--color-text-muted); }
+    .blast-none { padding:var(--space-6); text-align:center; font-size:var(--text-sm); color:var(--color-text-faint); font-style:italic; }
+
+    /* Negotiation live view */
+    .negotiation-panel { display:none; }
+    .negotiation-panel.active { display:block; }
+    .neg-timeline { display:flex; flex-direction:column; gap:var(--space-2); max-height:240px; overflow-y:auto; }
+    .neg-event {
+      display:flex; align-items:flex-start; gap:var(--space-3);
+      font-size:var(--text-xs); padding:var(--space-2) 0;
+      border-bottom:1px solid var(--color-divider);
+      animation:feed-in 0.3s ease;
+    }
+    .neg-event:last-child { border-bottom:none; }
+    .neg-icon { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+    .neg-icon.send   { background:var(--color-primary-highlight); color:var(--color-primary); }
+    .neg-icon.reply  { background:var(--color-success-highlight); color:var(--color-success); }
+    .neg-icon.lock   { background:var(--color-gold-highlight);    color:var(--color-gold); }
+    .neg-icon.reject { background:var(--color-surface-offset);    color:var(--color-text-muted); }
+    .neg-body { flex:1; }
+    .neg-body strong { font-weight:600; color:var(--color-text); }
+    .neg-body span   { color:var(--color-text-muted); }
+    .neg-time { font-size:10px; color:var(--color-text-faint); flex-shrink:0; padding-top:2px; }
   </style>
 </head>
 <body>
@@ -284,7 +331,7 @@
         <h1 class="page-title">Patient Directory</h1>
         <p class="page-subtitle">Active patients eligible for slot fill outreach</p>
       </div>
-      <div style="display:flex;gap:var(--space-3);align-items:center">
+      <div style="display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap">
         <button class="btn btn-primary" id="add-patient-btn">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
           Add Patient
@@ -298,7 +345,7 @@
 
     <div class="patients-layout">
 
-      <!-- Left: table column -->
+      <!-- Table column -->
       <div>
         <!-- Toolbar -->
         <div class="toolbar">
@@ -307,7 +354,6 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               <input class="search-input" type="search" id="search-input" placeholder="Search by name, phone, or zip…" autocomplete="off">
             </div>
-            <!-- Import as small icon button next to search -->
             <button class="icon-btn" id="import-btn" title="Import CSV" aria-label="Import CSV">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             </button>
@@ -318,7 +364,7 @@
           </button>
         </div>
 
-        <!-- Batch action bar (hidden until rows selected) -->
+        <!-- Batch bar -->
         <div class="batch-bar" id="batch-bar">
           <span class="batch-count" id="batch-count">0 selected</span>
           <button class="btn btn-primary btn-sm" id="batch-blast-btn">
@@ -334,15 +380,14 @@
             <table>
               <thead>
                 <tr>
-                  <th class="col-check">
-                    <input type="checkbox" id="select-all" title="Select all on page">
-                  </th>
+                  <th class="col-check"><input type="checkbox" id="select-all" title="Select all"></th>
                   <th>Name</th>
                   <th>Phone</th>
                   <th>Location</th>
-                  <th>Status</th>
+                  <th>Availability</th>
+                  <th>AI Status</th>
                   <th>Last Contacted</th>
-                  <th style="width:72px"></th>
+                  <th style="width:64px"></th>
                 </tr>
               </thead>
               <tbody id="patients-tbody"></tbody>
@@ -358,29 +403,29 @@
         </div>
       </div>
 
-      <!-- Right: Live feed panel -->
+      <!-- Live Feed -->
       <div class="feed-panel">
         <div class="feed-header">
           <span class="feed-dot"></span>
           <h2>Live Activity</h2>
         </div>
         <ul class="feed-list" id="feed-list">
-          <li class="feed-item">
+          <li class="feed-item" data-patient-id="5">
             <div class="feed-meta"><span class="feed-name">Fatima</span><span class="feed-time">just now</span></div>
             <p class="feed-msg">"On my way! See you at 2pm"</p>
             <span class="feed-badge replied">Replied</span>
           </li>
-          <li class="feed-item">
+          <li class="feed-item" data-patient-id="2">
             <div class="feed-meta"><span class="feed-name">James</span><span class="feed-time">2 min ago</span></div>
-            <p class="feed-msg">Gemini negotiating Tuesday slot…</p>
+            <p class="feed-msg">Sam negotiating Tuesday 10 AM slot…</p>
             <span class="feed-badge ai">AI Active</span>
           </li>
-          <li class="feed-item">
+          <li class="feed-item" data-patient-id="1">
             <div class="feed-meta"><span class="feed-name">Maria</span><span class="feed-time">8 min ago</span></div>
             <p class="feed-msg">"Yes, that time works for me."</p>
             <span class="feed-badge confirmed">Confirmed</span>
           </li>
-          <li class="feed-item">
+          <li class="feed-item" data-patient-id="3">
             <div class="feed-meta"><span class="feed-name">Priya</span><span class="feed-time">14 min ago</span></div>
             <p class="feed-msg">Outreach sent — awaiting response</p>
             <span class="feed-badge ai">AI Active</span>
@@ -388,8 +433,125 @@
         </ul>
       </div>
 
-    </div><!-- /.patients-layout -->
+    </div>
   </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SLIDE-OVER DRAWER
+═══════════════════════════════════════════════════════ -->
+<div class="drawer-backdrop" id="drawer-backdrop"></div>
+<div class="drawer" id="patient-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-patient-name">
+
+  <div class="drawer-header">
+    <div class="drawer-patient-meta">
+      <span class="drawer-patient-name" id="drawer-patient-name">—</span>
+      <span class="drawer-patient-sub" id="drawer-patient-sub">—</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--space-2)">
+      <span id="drawer-ai-badge"></span>
+      <button class="icon-btn" id="drawer-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Availability strip -->
+  <div class="drawer-avail-strip">
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-faint);margin-bottom:4px">Availability</div>
+      <div id="drawer-avail-items" class="drawer-avail-items"></div>
+    </div>
+    <button class="intake-refresh-btn" id="intake-refresh-btn" title="Re-run intake to collect fresh availability">
+      ↺ Refresh Intake
+    </button>
+  </div>
+
+  <!-- Conversation log -->
+  <div class="convo-log" id="convo-log"></div>
+
+  <!-- Footer: manual override -->
+  <div class="drawer-footer">
+    <div class="override-row">
+      <span class="override-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Manual Override — freeze AI agent
+      </span>
+      <div class="toggle-wrap">
+        <label class="toggle" aria-label="Toggle manual override">
+          <input type="checkbox" id="override-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-status" id="override-status">Off</span>
+      </div>
+    </div>
+    <div class="manual-compose" id="manual-compose">
+      <input class="manual-input" type="text" id="manual-input" placeholder="Type a message to send via Twilio…" aria-label="Manual message">
+      <button class="manual-send-btn" id="manual-send-btn">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     CANCELLATION BLAST MODAL
+═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="blast-modal" role="dialog" aria-modal="true" aria-labelledby="blast-title">
+  <div class="modal blast-modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="blast-title">Open Cancellation Blast</h2>
+      <button class="icon-btn" id="blast-close" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Step 1: Slot config -->
+    <div id="blast-step-1">
+      <div class="modal-body">
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted)">Define the open slot. Radius Filler will match patients by proximity, day, and time preference — then open parallel AI negotiations automatically.</p>
+        <div class="blast-slot-row">
+          <div class="form-group">
+            <label class="form-label" for="blast-day">Day of Week</label>
+            <select class="form-input" id="blast-day">
+              <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+              <option>Thursday</option><option>Friday</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="blast-time">Time</label>
+            <input class="form-input" type="time" id="blast-time" value="10:00">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="blast-radius">Radius (mi)</label>
+            <input class="form-input" type="number" id="blast-radius" value="25" min="5" max="100">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Matched Candidates</label>
+          <div class="match-preview">
+            <div class="match-preview-header">
+              <span>Patient</span><span>Match reason</span>
+            </div>
+            <div class="match-list" id="match-list"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="blast-cancel-1">Cancel</button>
+        <button class="btn btn-primary" id="blast-launch-btn">Launch Negotiations →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Live negotiation view -->
+    <div id="blast-step-2" style="display:none">
+      <div class="modal-body">
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)">Sam is simultaneously negotiating with matched patients. The slot locks the moment the first patient confirms.</p>
+        <div class="neg-timeline" id="neg-timeline"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="blast-done-btn">Done</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Add Patient Modal -->
@@ -458,30 +620,12 @@
   </div>
 </div>
 
-<!-- Convo history modal -->
-<div class="modal-overlay" id="convo-modal" role="dialog" aria-modal="true" aria-labelledby="convo-title">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 class="modal-title" id="convo-title">Conversation History</h2>
-      <button class="icon-btn" id="convo-close" aria-label="Close">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="modal-body" id="convo-body">
-      <p style="color:var(--color-text-muted);font-size:var(--text-sm)">No messages yet. Conversation history will appear here once SMS outreach begins.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" id="convo-cancel">Close</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
 <script type="module">
 import { supabase, PRACTICE_ID } from './app.js';
 
-// Theme toggle
+// ── Theme toggle ──────────────────────────────────────────
 (function(){
   const t = document.querySelector('[data-theme-toggle]'), r = document.documentElement;
   let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
@@ -499,51 +643,90 @@ function toast(msg, type='success') {
   setTimeout(() => { t.classList.remove('show'); setTimeout(()=>t.remove(),300); }, 3500);
 }
 
-// Strip +1 from phone for display — show inline, country code faded
 function formatPhone(raw) {
   const cleaned = raw.replace(/^\+1\s?/, '').trim();
   return `<span class="phone-cc">+1</span><span class="phone-number">${cleaned}</span>`;
 }
-
-// Location: bold town on top, zip muted underneath
 function formatLocation(zip, town) {
   return `<span class="loc-town">${town}</span><span class="loc-zip">${zip}</span>`;
 }
-
-// Last contacted: human relative time
 function formatContacted(dateStr) {
   if (!dateStr) return '<span class="td-contacted never">Never</span>';
-  const d = new Date(dateStr);
-  const now = new Date();
+  const d = new Date(dateStr), now = new Date();
   const days = Math.floor((now - d) / 86400000);
-  let label;
-  if (days === 0) label = 'Today';
-  else if (days === 1) label = 'Yesterday';
-  else if (days < 7) label = `${days}d ago`;
-  else if (days < 30) label = `${Math.floor(days/7)}w ago`;
-  else label = `${Math.floor(days/30)}mo ago`;
+  let label = days===0?'Today':days===1?'Yesterday':days<7?`${days}d ago`:days<30?`${Math.floor(days/7)}w ago`:`${Math.floor(days/30)}mo ago`;
   return `<span class="td-contacted">${label}</span>`;
 }
 
-// ── Mock data ──────────────────────────────────────────────
+// ── AI state badge HTML ────────────────────────────────────
+const AI_STATE_MAP = {
+  IDLE:            { cls:'ai-idle',       label:'Idle' },
+  INTAKE_PENDING:  { cls:'ai-intake',     label:'Intake Pending' },
+  INTAKE_ACTIVE:   { cls:'ai-intake',     label:'Intake Active' },
+  MATCHED:         { cls:'ai-synced',     label:'Synced' },
+  NEGOTIATING:     { cls:'ai-negotiating',label:'Negotiating' },
+  BOOKED:          { cls:'ai-booked',     label:'Booked' },
+  BLOCKED:         { cls:'ai-blocked',    label:'Blocked' },
+};
+function aiBadgeHtml(state) {
+  const s = AI_STATE_MAP[state] || AI_STATE_MAP.IDLE;
+  return `<span class="ai-badge ${s.cls}"><span class="ai-dot"></span>${s.label}</span>`;
+}
+
+// ── Availability summary ───────────────────────────────────
+function availSummary(p) {
+  if (!p.days_of_week || !p.days_of_week.length) return '<span class="avail-none">Not collected</span>';
+  const days = p.days_of_week.map(d => d.slice(0,3)).join(', ');
+  const time = p.time_preference === 'AM' ? 'AM' : p.time_preference === 'PM' ? 'PM' : 'All day';
+  const notice = p.min_notice_minutes ? ` [${p.min_notice_minutes/60}hr]` : '';
+  return `<span class="avail-pill">${days} ${time}${notice}</span>`;
+}
+function availChips(p) {
+  if (!p.days_of_week || !p.days_of_week.length) return '<span class="drawer-avail-empty">Not yet collected — run Refresh Intake</span>';
+  return p.days_of_week.map(d => `<span class="drawer-avail-chip">${d}</span>`).join('')
+    + `<span class="drawer-avail-chip">${p.time_preference||'Any'}</span>`
+    + (p.min_notice_minutes ? `<span class="drawer-avail-chip">${p.min_notice_minutes/60}hr notice</span>` : '');
+}
+
+// ── Mock data with AI fields ────────────────────────────────
 let PATIENTS = [
-  { id:'1', first_name:'Maria',   mobile_phone:'(207) 555-0101', zip_code:'04101', town:'Portland',    is_active:true,  last_contacted:'2026-05-20' },
-  { id:'2', first_name:'James',   mobile_phone:'(207) 555-0102', zip_code:'04102', town:'Portland',    is_active:true,  last_contacted:'2026-05-18' },
-  { id:'3', first_name:'Priya',   mobile_phone:'(207) 555-0103', zip_code:'04103', town:'Portland',    is_active:true,  last_contacted:'2026-05-15' },
-  { id:'4', first_name:'Derek',   mobile_phone:'(207) 555-0104', zip_code:'04240', town:'Lewiston',    is_active:true,  last_contacted:'2026-05-10' },
-  { id:'5', first_name:'Fatima',  mobile_phone:'(207) 555-0105', zip_code:'04106', town:'S. Portland', is_active:true,  last_contacted:null },
-  { id:'6', first_name:'Carlos',  mobile_phone:'(207) 555-0106', zip_code:'04105', town:'Portland',    is_active:false, last_contacted:'2026-04-01' },
-  { id:'7', first_name:'Sarah',   mobile_phone:'(207) 555-0107', zip_code:'04401', town:'Bangor',      is_active:true,  last_contacted:'2026-05-22' },
-  { id:'8', first_name:'Michael', mobile_phone:'(207) 555-0108', zip_code:'04101', town:'Portland',    is_active:true,  last_contacted:'2026-05-21' },
+  { id:'0',  first_name:'Courtney', mobile_phone:'2079399308',    zip_code:'04020', town:'Cornish',     is_active:true,  last_contacted:null,         ai_state:'INTAKE_PENDING', days_of_week:[], time_preference:null, min_notice_minutes:null,
+    conversation: [] },
+  { id:'1',  first_name:'Maria',    mobile_phone:'(207) 555-0101', zip_code:'04101', town:'Portland',    is_active:true,  last_contacted:'2026-05-20',  ai_state:'BOOKED',         days_of_week:['Tuesday','Thursday'], time_preference:'AM', min_notice_minutes:120,
+    conversation: [
+      { role:'outbound', sender:'Sam (AI)', text:'Hi Maria, this is Sam from Bright Smiles Dental. We have an opening this Tuesday at 10 AM — would that work for you?', time:'10:02 AM' },
+      { role:'inbound',  sender:'Maria',    text:'Yes, that time works for me.', time:'10:08 AM' },
+      { role:'outbound', sender:'Sam (AI)', text:'Wonderful! You are all set for Tuesday at 10 AM. We will send a reminder the morning of. See you then!', time:'10:08 AM' },
+    ]
+  },
+  { id:'2',  first_name:'James',    mobile_phone:'(207) 555-0102', zip_code:'04102', town:'Portland',    is_active:true,  last_contacted:'2026-05-18',  ai_state:'NEGOTIATING',    days_of_week:['Tuesday','Friday'], time_preference:'AM', min_notice_minutes:60,
+    conversation: [
+      { role:'outbound', sender:'Sam (AI)', text:'Hey James! Sam here from Bright Smiles. We just had a Tuesday 10 AM slot open up — you mentioned Tuesday mornings work well. Interested?', time:'10:02 AM' },
+      { role:'inbound',  sender:'James',    text:'I can\'t do 10, do you have an 11:30?', time:'10:14 AM' },
+      { role:'outbound', sender:'Sam (AI)', text:'Great question — let me check with the front desk. Unfortunately our next available on Tuesday is 10 AM or 2:30 PM. Would either of those work?', time:'10:14 AM' },
+    ]
+  },
+  { id:'3',  first_name:'Priya',    mobile_phone:'(207) 555-0103', zip_code:'04103', town:'Portland',    is_active:true,  last_contacted:'2026-05-15',  ai_state:'NEGOTIATING',    days_of_week:['Tuesday','Wednesday'], time_preference:'AM', min_notice_minutes:120,
+    conversation: [
+      { role:'outbound', sender:'Sam (AI)', text:'Hi Priya! Sam from Bright Smiles. We have a Tuesday 10 AM cancellation — you are on our priority list. Can you make it?', time:'10:02 AM' },
+    ]
+  },
+  { id:'4',  first_name:'Derek',    mobile_phone:'(207) 555-0104', zip_code:'04240', town:'Lewiston',    is_active:true,  last_contacted:'2026-05-10',  ai_state:'MATCHED',        days_of_week:['Thursday'], time_preference:'PM', min_notice_minutes:240,
+    conversation: [] },
+  { id:'5',  first_name:'Fatima',   mobile_phone:'(207) 555-0105', zip_code:'04106', town:'S. Portland', is_active:true,  last_contacted:null,          ai_state:'INTAKE_ACTIVE',  days_of_week:[], time_preference:null, min_notice_minutes:null,
+    conversation: [
+      { role:'outbound', sender:'Sam (AI)', text:'Hi Fatima! I\'m Sam, a care coordinator with Bright Smiles Dental. I just want to make sure we have your availability on file so we can reach out when a convenient slot opens up. What days and times generally work best for you?', time:'9:45 AM' },
+      { role:'inbound',  sender:'Fatima',   text:'Honestly, things are crazy with the kids, but usually Tuesday mornings after school drop-off, or anytime Thursdays if I get a couple hours\' notice.', time:'9:51 AM' },
+      { role:'outbound', sender:'Sam (AI)', text:'That is super helpful, thank you! So Tuesday mornings and Thursdays with a couple hours\' heads-up — I\'ve got that noted. We will make sure to reach out accordingly. Have a great day!', time:'9:51 AM' },
+    ]
+  },
+  { id:'6',  first_name:'Carlos',   mobile_phone:'(207) 555-0106', zip_code:'04105', town:'Portland',    is_active:false, last_contacted:'2026-04-01',  ai_state:'IDLE',           days_of_week:[], time_preference:null, min_notice_minutes:null, conversation:[] },
+  { id:'7',  first_name:'Sarah',    mobile_phone:'(207) 555-0107', zip_code:'04401', town:'Bangor',      is_active:true,  last_contacted:'2026-05-22',  ai_state:'IDLE',           days_of_week:['Monday','Wednesday'], time_preference:'Full_Day', min_notice_minutes:60, conversation:[] },
+  { id:'8',  first_name:'Michael',  mobile_phone:'(207) 555-0108', zip_code:'04101', town:'Portland',    is_active:true,  last_contacted:'2026-05-21',  ai_state:'MATCHED',        days_of_week:['Tuesday','Thursday'], time_preference:'AM', min_notice_minutes:120, conversation:[] },
 ];
 
-// Also add Courtney from the screenshot
-PATIENTS.unshift({ id:'0', first_name:'Courtney', mobile_phone:'2079399308', zip_code:'04020', town:'Cornish', is_active:true, last_contacted:null });
-
 const PAGE_SIZE = 7;
-let page = 0;
-let query = '';
-let showInactive = false;
+let page = 0, query = '', showInactive = false;
 let selectedIds = new Set();
 
 function filtered() {
@@ -558,12 +741,8 @@ function filtered() {
 function updateBatchBar() {
   const bar = document.getElementById('batch-bar');
   const count = document.getElementById('batch-count');
-  if (selectedIds.size > 0) {
-    bar.classList.add('visible');
-    count.textContent = `${selectedIds.size} selected`;
-  } else {
-    bar.classList.remove('visible');
-  }
+  if (selectedIds.size > 0) { bar.classList.add('visible'); count.textContent = `${selectedIds.size} selected`; }
+  else bar.classList.remove('visible');
 }
 
 function renderTable() {
@@ -574,32 +753,26 @@ function renderTable() {
   const pageIds = pageRows.map(p => p.id);
 
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-      <h3>No patients found</h3>
-      <p>Try a different search or add a patient.</p>
+      <h3>No patients found</h3><p>Try a different search or add a patient.</p>
     </div></td></tr>`;
   } else {
     tbody.innerHTML = pageRows.map(p => {
       const checked = selectedIds.has(p.id) ? 'checked' : '';
-      return `<tr>
-        <td class="col-check">
+      return `<tr style="cursor:pointer" data-patient-id="${p.id}">
+        <td class="col-check" onclick="event.stopPropagation()">
           <input type="checkbox" class="row-check" data-id="${p.id}" ${checked} aria-label="Select ${p.first_name}">
         </td>
         <td style="font-weight:600">${p.first_name}</td>
         <td class="phone-cell">${formatPhone(p.mobile_phone)}</td>
         <td>${formatLocation(p.zip_code, p.town)}</td>
-        <td>${p.is_active
-          ? '<span class="badge badge-filled"><span class="badge-dot"></span>Active</span>'
-          : '<span class="badge badge-closed"><span class="badge-dot"></span>Inactive</span>'}
-        </td>
+        <td>${availSummary(p)}</td>
+        <td>${aiBadgeHtml(p.ai_state)}</td>
         <td>${formatContacted(p.last_contacted)}</td>
-        <td>
+        <td onclick="event.stopPropagation()">
           <div class="row-actions">
-            <button class="row-icon-btn convo-btn" data-id="${p.id}" data-name="${p.first_name}" title="View conversation history" aria-label="View conversation for ${p.first_name}">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            </button>
-            <button class="row-icon-btn deactivate-btn" data-id="${p.id}" title="${p.is_active ? 'Deactivate' : 'Activate'}" aria-label="${p.is_active ? 'Deactivate' : 'Activate'} ${p.first_name}">
+            <button class="row-icon-btn deactivate-btn" data-id="${p.id}" title="${p.is_active?'Deactivate':'Activate'}" aria-label="${p.is_active?'Deactivate':'Activate'} ${p.first_name}">
               ${p.is_active
                 ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>'
                 : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v10m6.36 1.64a9 9 0 1 1-12.73 0"/></svg>'}
@@ -610,143 +783,317 @@ function renderTable() {
     }).join('');
   }
 
-  // Sync select-all
   const allChecked = pageIds.length > 0 && pageIds.every(id => selectedIds.has(id));
   document.getElementById('select-all').checked = allChecked;
   document.getElementById('select-all').indeterminate = !allChecked && pageIds.some(id => selectedIds.has(id));
-
-  document.getElementById('pagination-info').textContent = `${rows.length} patient${rows.length !== 1 ? 's' : ''}`;
+  document.getElementById('pagination-info').textContent = `${rows.length} patient${rows.length!==1?'s':''}`;
   document.getElementById('prev-btn').disabled = page === 0;
   document.getElementById('next-btn').disabled = start + PAGE_SIZE >= rows.length;
 
-  // Row checkboxes
+  // Row click → open drawer
+  tbody.querySelectorAll('tr[data-patient-id]').forEach(row => {
+    row.addEventListener('click', () => openDrawer(row.dataset.patientId));
+  });
+
   tbody.querySelectorAll('.row-check').forEach(cb => {
     cb.addEventListener('change', () => {
-      if (cb.checked) selectedIds.add(cb.dataset.id);
-      else selectedIds.delete(cb.dataset.id);
+      if (cb.checked) selectedIds.add(cb.dataset.id); else selectedIds.delete(cb.dataset.id);
       updateBatchBar();
-      const pageIds2 = filtered().slice(page*PAGE_SIZE, page*PAGE_SIZE+PAGE_SIZE).map(p=>p.id);
-      const allC = pageIds2.every(id => selectedIds.has(id));
-      document.getElementById('select-all').checked = allC;
-      document.getElementById('select-all').indeterminate = !allC && pageIds2.some(id => selectedIds.has(id));
+      const pi = filtered().slice(page*PAGE_SIZE, page*PAGE_SIZE+PAGE_SIZE).map(p=>p.id);
+      const ac = pi.every(id => selectedIds.has(id));
+      document.getElementById('select-all').checked = ac;
+      document.getElementById('select-all').indeterminate = !ac && pi.some(id => selectedIds.has(id));
     });
   });
 
-  // Deactivate toggle
   tbody.querySelectorAll('.deactivate-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const p = PATIENTS.find(x => x.id === btn.dataset.id);
-      if (p) { p.is_active = !p.is_active; renderTable(); toast(`${p.first_name} ${p.is_active ? 'activated' : 'deactivated'}.`); }
-    });
-  });
-
-  // Convo buttons
-  tbody.querySelectorAll('.convo-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('convo-title').textContent = `${btn.dataset.name} — Conversation History`;
-      document.getElementById('convo-modal').classList.add('open');
+      if (p) { p.is_active = !p.is_active; renderTable(); toast(`${p.first_name} ${p.is_active?'activated':'deactivated'}.`); }
     });
   });
 }
 
-// Select all on page
 document.getElementById('select-all').addEventListener('change', e => {
-  const pageIds = filtered().slice(page*PAGE_SIZE, page*PAGE_SIZE+PAGE_SIZE).map(p=>p.id);
-  if (e.target.checked) pageIds.forEach(id => selectedIds.add(id));
-  else pageIds.forEach(id => selectedIds.delete(id));
-  updateBatchBar();
-  renderTable();
+  const pi = filtered().slice(page*PAGE_SIZE, page*PAGE_SIZE+PAGE_SIZE).map(p=>p.id);
+  if (e.target.checked) pi.forEach(id => selectedIds.add(id)); else pi.forEach(id => selectedIds.delete(id));
+  updateBatchBar(); renderTable();
 });
-
-// Batch blast
 document.getElementById('batch-blast-btn').addEventListener('click', () => {
   toast(`Text blast queued for ${selectedIds.size} patient${selectedIds.size!==1?'s':''}.`);
-  selectedIds.clear();
-  updateBatchBar();
-  renderTable();
-});
-document.getElementById('batch-clear-btn').addEventListener('click', () => {
   selectedIds.clear(); updateBatchBar(); renderTable();
 });
-
-// Fill slot CTA
-document.getElementById('fill-slot-btn').addEventListener('click', () => {
-  toast('Cancellation blast triggered. Outreach is on its way.');
-});
-
-// Search / pagination / inactive toggle
-document.getElementById('search-input').addEventListener('input', e => { query = e.target.value; page = 0; selectedIds.clear(); updateBatchBar(); renderTable(); });
+document.getElementById('batch-clear-btn').addEventListener('click', () => { selectedIds.clear(); updateBatchBar(); renderTable(); });
+document.getElementById('search-input').addEventListener('input', e => { query=e.target.value; page=0; selectedIds.clear(); updateBatchBar(); renderTable(); });
 document.getElementById('prev-btn').addEventListener('click', () => { page--; renderTable(); });
 document.getElementById('next-btn').addEventListener('click', () => { page++; renderTable(); });
 const toggleBtn = document.getElementById('toggle-inactive');
 toggleBtn.addEventListener('click', () => {
-  showInactive = !showInactive; page = 0; selectedIds.clear(); updateBatchBar();
+  showInactive=!showInactive; page=0; selectedIds.clear(); updateBatchBar();
   toggleBtn.style.color = showInactive ? 'var(--color-primary)' : '';
   renderTable();
 });
 
-// Add patient modal
+// Live feed row clicks → drawer
+document.querySelectorAll('.feed-item[data-patient-id]').forEach(item => {
+  item.addEventListener('click', () => openDrawer(item.dataset.patientId));
+});
+
+// ── SLIDE-OVER DRAWER ─────────────────────────────────────
+function openDrawer(patientId) {
+  const p = PATIENTS.find(x => x.id === patientId);
+  if (!p) return;
+
+  document.getElementById('drawer-patient-name').textContent = p.first_name;
+  document.getElementById('drawer-patient-sub').textContent = `${p.town}, ${p.zip_code} · ${p.mobile_phone}`;
+  document.getElementById('drawer-ai-badge').innerHTML = aiBadgeHtml(p.ai_state);
+  document.getElementById('drawer-avail-items').innerHTML = availChips(p);
+
+  // Render conversation
+  const log = document.getElementById('convo-log');
+  if (!p.conversation || !p.conversation.length) {
+    log.innerHTML = `<div class="convo-empty">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <p>No messages yet. Conversation history will appear here once Sam initiates outreach.</p>
+    </div>`;
+  } else {
+    log.innerHTML = p.conversation.map(msg => `
+      <div class="convo-bubble-row ${msg.role}">
+        <span class="bubble-sender">${msg.sender}</span>
+        <div class="bubble ${msg.role}">${msg.text}</div>
+        <span class="bubble-time">${msg.time}</span>
+      </div>`).join('');
+    setTimeout(() => { log.scrollTop = log.scrollHeight; }, 50);
+  }
+
+  // Reset override toggle
+  const tog = document.getElementById('override-toggle');
+  tog.checked = false;
+  document.getElementById('override-status').textContent = 'Off';
+  document.getElementById('override-status').className = 'toggle-status';
+  document.getElementById('manual-compose').classList.remove('visible');
+
+  document.getElementById('patient-drawer').classList.add('open');
+  document.getElementById('drawer-backdrop').classList.add('open');
+  document.getElementById('patient-drawer').dataset.currentPatient = patientId;
+}
+
+function closeDrawer() {
+  document.getElementById('patient-drawer').classList.remove('open');
+  document.getElementById('drawer-backdrop').classList.remove('open');
+}
+
+document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
+
+// Override toggle
+document.getElementById('override-toggle').addEventListener('change', e => {
+  const on = e.target.checked;
+  const status = document.getElementById('override-status');
+  const compose = document.getElementById('manual-compose');
+  status.textContent = on ? 'On — AI Frozen' : 'Off';
+  status.className = 'toggle-status' + (on ? ' active' : '');
+  compose.classList.toggle('visible', on);
+  if (on) toast('AI agent paused. Manual mode active.', 'error');
+  else toast('AI agent resumed.');
+});
+
+// Manual send
+document.getElementById('manual-send-btn').addEventListener('click', () => {
+  const input = document.getElementById('manual-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const pid = document.getElementById('patient-drawer').dataset.currentPatient;
+  const p = PATIENTS.find(x => x.id === pid);
+  if (!p) return;
+  p.conversation = p.conversation || [];
+  p.conversation.push({ role:'outbound', sender:'Receptionist (Manual)', text, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+  input.value = '';
+  // Re-render log
+  const log = document.getElementById('convo-log');
+  const newBubble = document.createElement('div');
+  newBubble.className = 'convo-bubble-row outbound';
+  newBubble.innerHTML = `<span class="bubble-sender">Receptionist (Manual)</span><div class="bubble outbound">${text}</div><span class="bubble-time">just now</span>`;
+  log.appendChild(newBubble);
+  setTimeout(() => { log.scrollTop = log.scrollHeight; }, 50);
+  toast('Message sent via Twilio.');
+});
+
+// Intake refresh button
+document.getElementById('intake-refresh-btn').addEventListener('click', () => {
+  const pid = document.getElementById('patient-drawer').dataset.currentPatient;
+  const p = PATIENTS.find(x => x.id === pid);
+  if (!p) return;
+  p.ai_state = 'INTAKE_ACTIVE';
+  document.getElementById('drawer-ai-badge').innerHTML = aiBadgeHtml('INTAKE_ACTIVE');
+  renderTable();
+  toast(`Intake refresh triggered for ${p.first_name}.`);
+});
+
+// ── CANCELLATION BLAST MODAL ──────────────────────────────
+document.getElementById('fill-slot-btn').addEventListener('click', () => {
+  renderMatchList();
+  document.getElementById('blast-step-1').style.display = '';
+  document.getElementById('blast-step-2').style.display = 'none';
+  document.getElementById('blast-modal').classList.add('open');
+});
+
+function renderMatchList() {
+  const day = document.getElementById('blast-day').value;
+  const timeVal = document.getElementById('blast-time').value; // "HH:MM"
+  const hour = parseInt(timeVal.split(':')[0]);
+  const pref = hour < 12 ? 'AM' : 'PM';
+
+  const matches = PATIENTS.filter(p =>
+    p.is_active &&
+    p.days_of_week && p.days_of_week.includes(day) &&
+    (p.time_preference === pref || p.time_preference === 'Full_Day')
+  );
+
+  const list = document.getElementById('match-list');
+  if (!matches.length) {
+    list.innerHTML = `<div class="blast-none">No matched patients for ${day} ${pref}. Try adjusting the radius or day.</div>`;
+    document.getElementById('blast-launch-btn').disabled = true;
+  } else {
+    list.innerHTML = matches.map(p =>
+      `<div class="match-row">
+        <div><span class="match-name">${p.first_name}</span> <span class="match-meta">${p.town} · ${p.zip_code}</span></div>
+        <span class="avail-pill">${p.days_of_week.filter(d=>d===day).join()} ${p.time_preference}</span>
+      </div>`
+    ).join('');
+    document.getElementById('blast-launch-btn').disabled = false;
+  }
+}
+
+['blast-day','blast-time','blast-radius'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderMatchList);
+});
+
+document.getElementById('blast-cancel-1').addEventListener('click', () => document.getElementById('blast-modal').classList.remove('open'));
+document.getElementById('blast-close').addEventListener('click', () => document.getElementById('blast-modal').classList.remove('open'));
+document.getElementById('blast-done-btn').addEventListener('click', () => document.getElementById('blast-modal').classList.remove('open'));
+
+document.getElementById('blast-launch-btn').addEventListener('click', () => {
+  const day = document.getElementById('blast-day').value;
+  const timeVal = document.getElementById('blast-time').value;
+  const hour = parseInt(timeVal.split(':')[0]);
+  const pref = hour < 12 ? 'AM' : 'PM';
+  const displayTime = new Date(`2000-01-01T${timeVal}`).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+
+  const matches = PATIENTS.filter(p =>
+    p.is_active &&
+    p.days_of_week && p.days_of_week.includes(day) &&
+    (p.time_preference === pref || p.time_preference === 'Full_Day')
+  );
+
+  // Flip matched patients to NEGOTIATING
+  matches.forEach(p => { p.ai_state = 'NEGOTIATING'; });
+  renderTable();
+
+  // Show step 2
+  document.getElementById('blast-step-1').style.display = 'none';
+  document.getElementById('blast-step-2').style.display = '';
+
+  // Simulate negotiation timeline
+  const timeline = document.getElementById('neg-timeline');
+  timeline.innerHTML = '';
+
+  const events = [
+    { delay:0,    icon:'send',   html: `<strong>Blast opened</strong> — <span>${matches.length} candidates matched for ${day} at ${displayTime}</span>` },
+    ...matches.map((p, i) => ({
+      delay: 600 + i*400,
+      icon:'send',
+      html: `<strong>Sam → ${p.first_name}</strong><span>: "Hey ${p.first_name}! We just had a ${day} ${displayTime} slot open — you are on our priority list. Interested?"</span>`
+    })),
+    { delay: 600 + matches.length*400 + 1200, icon:'reply', html: `<strong>${matches[0]?.first_name||'Patient'} replied</strong> <span>"Yes, sign me up!"</span>` },
+    { delay: 600 + matches.length*400 + 1600, icon:'lock',  html: `<strong>Slot locked</strong> — <span>${matches[0]?.first_name||'Patient'} marked BOOKED. Calendar hold sent.</span>` },
+    ...matches.slice(1).map((p, i) => ({
+      delay: 600 + matches.length*400 + 2000 + i*300,
+      icon:'reject',
+      html: `<strong>Sam → ${p.first_name}</strong> <span>"Ah, someone just grabbed that slot — but you are top of the list for the next one!"</span>`
+    })),
+  ];
+
+  events.forEach(ev => {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'neg-event';
+      const iconSvgs = {
+        send:   '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+        reply:  '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+        lock:   '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+        reject: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+      };
+      el.innerHTML = `<div class="neg-icon ${ev.icon}">${iconSvgs[ev.icon]}</div><div class="neg-body">${ev.html}</div><span class="neg-time">now</span>`;
+      timeline.appendChild(el);
+      timeline.scrollTop = timeline.scrollHeight;
+
+      // After lock event, flip states
+      if (ev.icon === 'lock' && matches[0]) {
+        matches[0].ai_state = 'BOOKED';
+        matches.slice(1).forEach(p => { p.ai_state = 'MATCHED'; });
+        renderTable();
+      }
+    }, ev.delay);
+  });
+});
+
+// ── Add Patient modal ─────────────────────────────────────
 const aModal = document.getElementById('add-patient-modal');
 document.getElementById('add-patient-btn').addEventListener('click', () => aModal.classList.add('open'));
 document.getElementById('patient-modal-close').addEventListener('click', () => aModal.classList.remove('open'));
 document.getElementById('patient-modal-cancel').addEventListener('click', () => aModal.classList.remove('open'));
 aModal.addEventListener('click', e => { if(e.target===aModal) aModal.classList.remove('open'); });
 document.getElementById('patient-modal-save').addEventListener('click', () => {
-  const first = document.getElementById('p-first').value.trim();
-  const phone = document.getElementById('p-phone').value.trim();
-  const zip   = document.getElementById('p-zip').value.trim();
-  const town  = document.getElementById('p-town').value.trim();
-  if (!first) { toast('First name is required.', 'error'); return; }
-  PATIENTS.unshift({ id: Date.now().toString(), first_name:first, mobile_phone:phone||'—', zip_code:zip||'—', town:town||'—', is_active:true, last_contacted:null });
+  const first=document.getElementById('p-first').value.trim();
+  const phone=document.getElementById('p-phone').value.trim();
+  const zip=document.getElementById('p-zip').value.trim();
+  const town=document.getElementById('p-town').value.trim();
+  if(!first){toast('First name is required.','error');return;}
+  PATIENTS.unshift({ id:Date.now().toString(), first_name:first, mobile_phone:phone||'—', zip_code:zip||'—', town:town||'—', is_active:true, last_contacted:null, ai_state:'INTAKE_PENDING', days_of_week:[], time_preference:null, min_notice_minutes:null, conversation:[] });
   renderTable();
   aModal.classList.remove('open');
-  toast(`${first} added to directory.`);
-  ['p-first','p-phone','p-zip','p-town'].forEach(id => document.getElementById(id).value = '');
+  toast(`${first} added to directory. Intake outreach queued.`);
+  ['p-first','p-phone','p-zip','p-town'].forEach(id=>document.getElementById(id).value='');
 });
 
-// CSV Import modal
-let parsedRows = [];
-const iModal = document.getElementById('import-modal');
-document.getElementById('import-btn').addEventListener('click', () => iModal.classList.add('open'));
-document.getElementById('import-modal-close').addEventListener('click', () => iModal.classList.remove('open'));
-document.getElementById('import-cancel').addEventListener('click', () => iModal.classList.remove('open'));
-iModal.addEventListener('click', e => { if(e.target===iModal) iModal.classList.remove('open'); });
-function handleCSV(file) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    const lines = e.target.result.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-    parsedRows = lines.slice(1).map(line => {
-      const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g,''));
-      const obj = {};
-      headers.forEach((h,i) => obj[h] = vals[i] || '');
+// ── CSV Import ────────────────────────────────────────────
+let parsedRows=[];
+const iModal=document.getElementById('import-modal');
+document.getElementById('import-btn').addEventListener('click', ()=>iModal.classList.add('open'));
+document.getElementById('import-modal-close').addEventListener('click', ()=>iModal.classList.remove('open'));
+document.getElementById('import-cancel').addEventListener('click', ()=>iModal.classList.remove('open'));
+iModal.addEventListener('click', e=>{if(e.target===iModal)iModal.classList.remove('open');});
+function handleCSV(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.trim().split('\n');
+    const headers=lines[0].split(',').map(h=>h.trim().toLowerCase());
+    parsedRows=lines.slice(1).map(line=>{
+      const vals=line.split(',').map(v=>v.trim().replace(/^"|"$/g,''));
+      const obj={};
+      headers.forEach((h,i)=>obj[h]=vals[i]||'');
       return obj;
-    }).filter(r => r.first_name);
-    document.getElementById('import-preview').style.display = 'block';
-    document.getElementById('import-msg').textContent = `${parsedRows.length} patient${parsedRows.length!==1?'s':''} ready to import.`;
-    document.getElementById('import-confirm').disabled = parsedRows.length === 0;
+    }).filter(r=>r.first_name);
+    document.getElementById('import-preview').style.display='block';
+    document.getElementById('import-msg').textContent=`${parsedRows.length} patient${parsedRows.length!==1?'s':''} ready to import.`;
+    document.getElementById('import-confirm').disabled=parsedRows.length===0;
   };
   reader.readAsText(file);
 }
-document.getElementById('csv-file').addEventListener('change', e => { if(e.target.files[0]) handleCSV(e.target.files[0]); });
-document.getElementById('drop-zone').addEventListener('click', () => document.getElementById('csv-file').click());
-document.getElementById('import-confirm').addEventListener('click', () => {
-  parsedRows.forEach(r => {
-    PATIENTS.unshift({ id:Date.now().toString()+Math.random(), first_name:r.first_name, mobile_phone:r.mobile_phone||'—', zip_code:r.zip_code||'—', town:r.town||'—', is_active:true, last_contacted:null });
+document.getElementById('csv-file').addEventListener('change',e=>{if(e.target.files[0])handleCSV(e.target.files[0]);});
+document.getElementById('drop-zone').addEventListener('click',()=>document.getElementById('csv-file').click());
+document.getElementById('import-confirm').addEventListener('click',()=>{
+  parsedRows.forEach(r=>{
+    PATIENTS.unshift({id:Date.now().toString()+Math.random(),first_name:r.first_name,mobile_phone:r.mobile_phone||'—',zip_code:r.zip_code||'—',town:r.town||'—',is_active:true,last_contacted:null,ai_state:'INTAKE_PENDING',days_of_week:[],time_preference:null,min_notice_minutes:null,conversation:[]});
   });
   renderTable();
   iModal.classList.remove('open');
   toast(`${parsedRows.length} patients imported.`);
-  parsedRows = [];
-  document.getElementById('import-preview').style.display = 'none';
-  document.getElementById('import-confirm').disabled = true;
+  parsedRows=[];
+  document.getElementById('import-preview').style.display='none';
+  document.getElementById('import-confirm').disabled=true;
 });
-
-// Convo modal
-const cModal = document.getElementById('convo-modal');
-document.getElementById('convo-close').addEventListener('click', () => cModal.classList.remove('open'));
-document.getElementById('convo-cancel').addEventListener('click', () => cModal.classList.remove('open'));
-cModal.addEventListener('click', e => { if(e.target===cModal) cModal.classList.remove('open'); });
 
 renderTable();
 </script>
